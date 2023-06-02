@@ -96,6 +96,9 @@ def play(game, x_player, o_player, print_game=True):
 
 
 if __name__ == '__main__':
+    print("\nWelcome to Tic Tac Toe!") 
+    print("You are 'X', and the computer is 'O'.")
+    print("Your goal is to get three of your marks in a row before the computer does.\n")
     choice = 'y'
 
     while choice != 'n':
