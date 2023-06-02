@@ -96,7 +96,11 @@ def play(game, x_player, o_player, print_game=True):
 
 
 if __name__ == '__main__':
-    x_player = RandomComputerPlayer('X')
-    o_player = HumanPlayer('O')
-    t = TicTacToe()
-    play(t, x_player, o_player, print_game=True)
+    choice = 'y'
+
+    while choice != 'n':
+        x_player = HumanPlayer('X')
+        o_player = RandomComputerPlayer('O')
+        t = TicTacToe()
+        play(t, x_player, o_player, print_game=True)
+        choice = input('Play again? (y/n): ')
