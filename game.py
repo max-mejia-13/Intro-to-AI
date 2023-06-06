@@ -45,6 +45,116 @@ class RandomComputerPlayer(Player):
         square = random.choice(game.available_moves())
         return square
 
+# Computer Player: Medium difficulty
+class MediumComputerPlayer(Player):
+    def __init__(self, letter):
+        super().__init__(letter)
+
+    def get_move(self, game):
+        if len(game.available_moves()) == 9:
+            square = random.choice(game.available_moves())  # Make a random move in the first turn
+        else:
+            square = self.minimax(game, self.letter)['position']
+        return square
+
+    def minimax(self, state, player):
+        max_player = self.letter  # AI player
+        other_player = 'O' if player == 'X' else 'X'
+
+        if state.current_winner == other_player:
+            # If the other player has won, assign a high score if the other player is the max player,
+            # or assign a low score if the other player is not the max player
+            return {'position': None, 'score': 1 * (state.num_empty_squares() + 1) if other_player == max_player else -1 * (state.num_empty_squares() + 1)}
+        elif not state.empty_squares():
+            # If there are no empty squares, it's a tie, so assign a score of 0
+            return {'position': None, 'score': 0}
+
+        if player == max_player:
+            best = {'position': None, 'score': -math.inf}
+        else:
+            best = {'position': None, 'score': math.inf}
+
+        for possible_move in state.available_moves():
+            state.make_move(possible_move, player)
+            sim_score = self.minimax(state, other_player)
+
+            # Undo move
+            state.board[possible_move] = ' '
+            state.current_winner = None
+            sim_score['position'] = possible_move
+
+            if player == max_player:
+                if sim_score['score'] > best['score']:
+                    best = sim_score
+            else:
+                if sim_score['score'] < best['score']:
+                    best = sim_score
+
+        return best
+
+        
+# Computer Player: Hard difficulty
+class HardComputerPlayer(Player):
+    def __init__(self, letter):
+        super().__init__(letter)
+
+    def get_move(self, game):
+        if len(game.available_moves()) == 9:
+            square = random.choice(game.available_moves())  # Make a random move in the first turn
+        else:
+            square = self.alpha_beta(game, self.letter)['position']
+        return square
+
+    def alpha_beta(self, state, player, alpha=-math.inf, beta=math.inf):
+        max_player = self.letter  # AI player
+        other_player = 'O' if player == 'X' else 'X'
+
+        if state.current_winner == other_player:
+            # If the other player has won, assign a high score if the other player is the max player,
+            # or assign a low score if the other player is not the max player
+            return {'position': None, 'score': 1 * (state.num_empty_squares() + 1) if other_player == max_player else -1 * (state.num_empty_squares() + 1)}
+        elif not state.empty_squares():
+            # If there are no empty squares, it's a tie, so assign a score of 0
+            return {'position': None, 'score': 0}
+
+        if player == max_player:
+            best = {'position': None, 'score': -math.inf}
+            for possible_move in state.available_moves():
+                state.make_move(possible_move, player)
+                sim_score = self.alpha_beta(state, other_player, alpha, beta)
+
+                # Undo move
+                state.board[possible_move] = ' '
+                state.current_winner = None
+                sim_score['position'] = possible_move
+
+                if sim_score['score'] > best['score']:
+                    best = sim_score
+
+                alpha = max(alpha, best['score'])
+                if alpha >= beta:
+                    # If alpha is greater than or equal to beta, we can prune the remaining branches
+                    break
+        else:
+            best = {'position': None, 'score': math.inf}
+            for possible_move in state.available_moves():
+                state.make_move(possible_move, player)
+                sim_score = self.alpha_beta(state, other_player, alpha, beta)
+
+                # Undo move
+                state.board[possible_move] = ' '
+                state.current_winner = None
+                sim_score['position'] = possible_move
+
+                if sim_score['score'] < best['score']:
+                    best = sim_score
+
+                beta = min(beta, best['score'])
+                if alpha >= beta:
+                    # If alpha is greater than or equal to beta, we can prune the remaining branches
+                    break
+
+        return best
 # Tic-Tac-Toe game: sets up board, register player moves, and checks game status
 class TicTacToe():
     def __init__(self):
@@ -144,15 +254,35 @@ if __name__ == '__main__':
     print("You are 'X', and the computer is 'O'.")
     print("Your goal is to get three of your marks in a row before the computer does.\n")
 
+    print("Select the computer difficulty level:")
+    print("1. Easy")
+    print("2. Medium")
+    print("3. Hard")
+    mode = input("Enter the mode number (1,2, or 3): ")
+    
     # Variable to check if user wants to play again
-    choice = 'y'
-
+    gameChoice = 'y'
+    
     # Game loop
-    while choice != 'n':
+    while gameChoice != 'n':
         x_player = HumanPlayer('X')
-        o_player = RandomComputerPlayer('O')
+
+        if mode == '1':
+            o_player = RandomComputerPlayer('O')  # Easy mode
+        elif mode == '2':
+            o_player = MediumComputerPlayer('O') # Medium mode
+        elif mode == '3':
+            o_player = HardComputerPlayer('O')  # Hard mode
+        else:
+            print("Invalid mode. Defaulting to Easy.")
+            o_player = RandomComputerPlayer('O')  # Default to Easy mode
+        
         t = TicTacToe()
         play(t, x_player, o_player, print_game=True)
-        choice = input('Play again? (y/n): ')
-
-
+        gameChoice = input('Play again? (y/n): ')
+        if gameChoice == 'y': 
+            print("Select the computer difficulty level:")
+            print("1. Easy")
+            print("2. Medium")
+            print("3. Hard")
+            mode = input("Enter the mode number (1,2, or 3): ")
